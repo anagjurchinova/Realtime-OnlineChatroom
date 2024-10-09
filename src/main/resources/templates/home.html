@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vikinger - Next Generation Social Community</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* CSS кодот ќе биде тука */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            background: linear-gradient(135deg, #7367F0, #CE9FFC);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #7367F0;
+            padding: 1rem;
+            color: white;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem;
+            border-radius: 20px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+            margin-right: 0.5rem;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        main {
+            display: flex;
+            justify-content: space-between;
+            padding: 4rem;
+            flex-grow: 1;
+        }
+
+        .content {
+            color: white;
+            max-width: 50%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInSlideUp 2s ease-in-out; /* Додавање на анимација */
+        }
+
+        @keyframes fadeInSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px); /* Почетно поместување надолу */
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0); /* Конечна позиција */
+            }
+        }
+
+        .buttons {
+            margin-top: 2rem;
+        }
+
+        .buttons button {
+            padding: 0.75rem 1.5rem;
+            margin-right: 1rem;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            background-color: #3a3a3a;
+            color: white;
+        }
+
+        .features-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .login-form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-form h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #7367F0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .signup-link a {
+            color: #7367F0;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-fire"></i>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active">Home</a></li>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">More</a></li>
+        </ul>
+        <div class="search-bar">
+            <input type="text" placeholder="Search here for people, groups and posts">
+            <i class="fas fa-search"></i>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="content">
+        <h1>WELCOME TO<br>AVI-CONNECT CHATROOM</h1>
+        <div>
+            <p>Join the Conversation Today!<br><br></p>
+
+            <p>At Avi-Connect, we believe that the best connections start with a conversation.</p>
+            <p>Sign up now and become a part of a thriving community where every chat could lead to a new friendship.
+            <br>Whether you’re here to meet new people or just pass the time, Avi-Connect is the perfect place to start.<br></p>
+
+            <p>Let’s Chat, Connect, and Grow Together!<br><br>
+                Love using Avi-Connect and want to support our community? You can help us continue to grow and improve by buying us a coffee!</p></div>
+        <div class="buttons">
+            <form action="/paypal">
+                <button type="submit" class="download-btn">Buy as a coffee!</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="login-form">
+        <h2>Account Login</h2>
+        <form method="post" action="/login">
+            <input type="text" name="usernameOrEmail" placeholder="Username or Email">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Login to your Account</button>
+        </form>
+        <p class="signup-link">Don't have an account? <a href="/signup">Sign up</a></p>
+    </div>
+</main>
+
+</body>
+</html>

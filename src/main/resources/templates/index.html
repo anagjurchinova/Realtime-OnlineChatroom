@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>RegistrationForm_v10 by Colorlib</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- LINEARICONS -->
+	<link rel="stylesheet" href="fonts/linearicons/style.css">
+
+	<!-- STYLE CSS -->
+	<link rel="stylesheet" href="css/style.css">
+
+	<style>
+		.username-suggestion-link {
+			font-size: 0.8em;
+			color: black;
+			cursor: pointer;
+			margin-top: 5px;
+		}
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 10000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgba(0,0,0,0.4);
+		}
+		.modal-content {
+			background-color: #fefefe;
+			margin: 15% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 80%;
+			max-width: 500px;
+		}
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+		.close:hover,
+		.close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		.wrapper {
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: linear-gradient(135deg, #7367F0, #CE9FFC);
+		}
+		button:hover{
+			background-color: #CE9FFC;
+		}
+		button {
+			border: none;
+			width: 100%;
+			height: 49px;
+			margin-top: 50px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 0;
+			background: #7367F0;
+			color: #fff;
+			text-transform: uppercase;
+			font-family: "Muli-SemiBold";
+			font-size: 15px;
+			letter-spacing: 2px;
+			transition: all 0.5s;
+			position: relative;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	<div class="inner">
+<!--		<img src="/images/image-1.png" alt="" class="image-1">-->
+		<form method="POST" action="/signup">
+			<h3>New Account?</h3>
+			<div class="form-holder">
+				<span class="lnr lnr-user"></span>
+				<input type="text" id="username" name="username" class="form-control" placeholder="Username">
+			</div>
+			<div class="username-suggestion-link">Need a username suggestion? <a href="#" id="usernameSuggestionLink">Click here</a>.</div>
+			<div class="form-holder">
+				<span class="lnr lnr-phone-handset"></span>
+				<input type="text" name="phoneNumber" class="form-control" placeholder="Phone Number">
+			</div>
+			<div class="form-holder">
+				<span class="lnr lnr-envelope"></span>
+				<input type="text" name="email" class="form-control" placeholder="Mail">
+			</div>
+			<div class="form-holder">
+				<span class="lnr lnr-lock"></span>
+				<input type="password" name="password" class="form-control" placeholder="Password">
+			</div>
+			<div class="form-holder">
+				<span class="lnr lnr-lock"></span>
+				<input type="password" name="repeatPassword" class="form-control" placeholder="Confirm Password">
+			</div>
+			<button type="submit">
+				<span>Register</span>
+			</button>
+			<div class="sign-up-error" th:if="${hasError}" th:text="${error}"></div>
+		</form>
+		<img src="images/image-2.png" alt="" class="image-2">
+	</div>
+</div>
+
+<!-- Modal -->
+<div id="usernameModal" class="modal">
+	<form method="POST" action="/" id="suggestion form" class="modal-content">
+		<span class="close">&times;</span>
+		<h4>Username Suggestion</h4>
+		<br>
+		<p>Enter your name for a username suggestion:</p>
+		<input type="text" id="name" name="name" placeholder="Your name">
+		<input type="text" id="lastname" name="lastname" placeholder="Your last name">
+		<br>
+		<label for="suggestedUsername">Suggested username:</label>
+		<input type="text" id="suggestedUsername" readonly>
+		<br>
+		<button type="button" id="suggestButton">I like this username</button>
+		<p id="suggest"></p>
+	</form>
+</div>
+
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/main.js"></script>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		var link = document.getElementById("usernameSuggestionLink");
+		var modal = document.getElementById("usernameModal");
+		var span = document.getElementsByClassName("close")[0];
+		var suggestButton = document.getElementById("suggestButton");
+		var suggestedUsernameInput = document.getElementById("suggestedUsername");
+		var usernameInput = document.getElementById("username");
+
+		if (link) {
+			link.addEventListener("click", function(event) {
+				event.preventDefault();
+				if (modal) {
+					modal.style.display = "block";
+				}
+			});
+		}
+
+		if (span) {
+			span.addEventListener("click", function() {
+				if (modal) {
+					modal.style.display = "none";
+				}
+			});
+		}
+
+		window.addEventListener("click", function(event) {
+			if (event.target == modal) {
+				modal.style.display = "none";
+			}
+		});
+
+		if (suggestButton) {
+			suggestButton.addEventListener("click", function() {
+				if (suggestedUsernameInput.value.trim().length > 0) {
+					usernameInput.value = suggestedUsernameInput.value;
+					modal.style.display = "none";
+				}
+			});
+		}
+	});
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const nameInput = document.getElementById('name');
+		const lastNameInput = document.getElementById('lastname');
+		const suggestedUsernameInput = document.getElementById('suggestedUsername');
+
+		let debounceTimer;
+
+		function updateUsername() {
+			if (nameInput.value.trim().length > 0 && lastNameInput.value.trim().length > 0) {
+				fetchSuggestedUsername(nameInput.value, lastNameInput.value);
+			} else {
+				suggestedUsernameInput.value = '';
+			}
+		}
+
+		nameInput.addEventListener('input', function() {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(updateUsername, 300);
+		});
+
+		lastNameInput.addEventListener('input', function() {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(updateUsername, 300);
+		});
+
+		function fetchSuggestedUsername(name, lastname) {
+			fetch(`/signup/generate-username?name=${encodeURIComponent(name)}&lastname=${encodeURIComponent(lastname)}`)
+					.then(response => response.text())
+					.then(username => {
+						suggestedUsernameInput.value = username;
+					})
+					.catch(error => console.error('Error:', error));
+		}
+	});
+</script>
+</body>
+</html>
+

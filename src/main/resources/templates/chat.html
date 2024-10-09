@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roba Chatroom</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+    .chat-container {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 40%;
+      background-color: white;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-chat {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      background-color: #e5e5e5;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, #7367F0, #CE9FFC);
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .message {
+      margin-bottom: 15px;
+      max-width: 70%;
+      display: flex;
+      align-items: flex-start;
+    }
+    .message.sent {
+      margin-left: auto;
+      text-align: right;
+      justify-content: flex-end;
+    }
+    .message-content {
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: inline-block;
+      max-width: 100%;
+    }
+    .message.sent .message-content {
+      background-color: #333333;
+      color: white;
+    }
+    .message.received .message-content {
+      background-color: white;
+      color: black;
+    }
+    .message-info {
+      font-size: 12px;
+      color: #888;
+      margin-left: -50px;
+      margin-top: 40px;
+    }
+    .message-sender {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .message-time {
+      font-size: 12px;
+      color: #888;
+    }
+    .chat-input {
+      background-color: white;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      background-color: #f0f0f0;
+    }
+    .chat-input button {
+      background: linear-gradient(135deg, #7367F0, #CE9FFC);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50%;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .sidebar-header {
+      background: linear-gradient(135deg, #7367F0, #CE9FFC);
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+    }
+    .search-bar {
+      padding: 10px 15px;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+    }
+    .active-users {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+    }
+    .active-users li {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 15px;
+      object-fit: cover;
+    }
+    .user-name {
+      font-weight: bold;
+    }
+    .online-indicator {
+      width: 10px;
+      height: 10px;
+      background-color: #2ecc71;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    .new-chat-button {
+      background: #7367F0;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: auto;
+    }
+    .message-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+<div class="chat-container">
+  <div class="sidebar">
+    <div class="sidebar-header">Active users</div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search">
+    </div>
+    <ul class="active-users" id="activeUsers">
+      <!-- Active users will be added here -->
+    </ul>
+    <button class="new-chat-button">New Chat</button>
+  </div>
+  <div class="main-chat">
+    <div class="chat-header">
+      <span>Chatroom</span>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="messageInput" placeholder="Write a message...">
+      <button id="sendMessageButton">➤</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+  let stompClient = null;
+  let username = '';
+  let userProfilePicture = '';
+
+  function fetchUsername() {
+    fetch('/chat/username')
+            .then(response => response.text())
+            .then(data => {
+              username = data;
+              console.log('Username:', username);
+              fetchUserProfilePicture();
+            })
+            .catch(error => console.error('Error:', error));
+  }
+
+  function fetchUserProfilePicture() {
+    fetch(`/usr_pfps/${username}.png`)
+            .then(response => {
+              if (response.ok) {
+                userProfilePicture = `/usr_pfps/${username}.png`;
+              } else {
+                userProfilePicture = '/usr_pfps/default.png';
+              }
+              console.log('User profile picture:', userProfilePicture);
+              connect();
+            })
+            .catch(error => {
+              console.error('Error fetching profile picture:', error);
+              userProfilePicture = '/usr_pfps/default.png';
+              connect();
+            });
+  }
+
+  function connect() {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, onConnected, onError);
+  }
+
+  function onConnected() {
+    stompClient.subscribe('/chatroom/public', onMessageReceived);
+    stompClient.subscribe('/topic/active-users', onActiveUsersReceived);
+    document.getElementById('sendMessageButton').addEventListener('click', sendMessage);
+
+    stompClient.send("/app/user-join", {}, username);
+  }
+
+  function onError(error) {
+    console.error('Error connecting to WebSocket', error);
+  }
+
+  function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const messageContent = messageInput.value.trim();
+    if (messageContent && stompClient && username) {
+      const chatMessage = {
+        from: username,
+        to: '',
+        body: messageContent,
+        timeSent: new Date().toISOString(),
+        messageStatus: 'SENT'
+      };
+      stompClient.send("/app/public-message", {}, JSON.stringify(chatMessage));
+      messageInput.value = '';
+    } else {
+      console.error('Cannot send message, username is not set or stompClient is not connected.');
+    }
+  }
+
+  function onMessageReceived(payload) {
+    const message = JSON.parse(payload.body);
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+
+    if (message.from === username) {
+      messageElement.classList.add('sent');
+    } else {
+      messageElement.classList.add('received');
+      const avatarImg = document.createElement('img');
+      avatarImg.src = '/usr_pfps/default.png';
+      avatarImg.alt = 'User Avatar';
+      avatarImg.className = 'message-avatar';
+      avatarImg.onerror = function() {
+        this.src = '/usr_pfps/default.png';
+      };
+      fetch(`/usr_pfps/${message.from}.png`)
+              .then(response => {
+                if (response.ok) {
+                  avatarImg.src = `/usr_pfps/${message.from}.png`;
+                }
+              });
+      messageElement.appendChild(avatarImg);
+    }
+
+    const messageContent = document.createElement('div');
+    messageContent.classList.add('message-content');
+    messageContent.innerText = message.body;
+    messageElement.appendChild(messageContent);
+
+    const messageInfo = document.createElement('div');
+    messageInfo.classList.add('message-info');
+
+    const messageSender = document.createElement('span');
+    messageSender.classList.add('message-sender');
+    messageSender.innerText = message.from;
+    messageInfo.appendChild(messageSender);
+
+    const messageTime = document.createElement('span');
+    messageTime.classList.add('message-time');
+    const date = new Date(message.timeSent);
+    messageTime.innerText = date.toLocaleDateString('en-US', { weekday: 'short' });
+    messageInfo.appendChild(messageTime);
+
+    messageElement.appendChild(messageInfo);
+
+    document.getElementById('chatMessages').appendChild(messageElement);
+  }
+
+  function onActiveUsersReceived(payload) {
+    console.log('Received active users update:', payload);
+    try {
+      const activeUsers = JSON.parse(payload.body);
+      console.log('Parsed active users:', activeUsers);
+      const activeUsersList = document.getElementById('activeUsers');
+      if (!activeUsersList) {
+        console.error('Element with id "activeUsers" not found');
+        return;
+      }
+      activeUsersList.innerHTML = '';
+      activeUsers.forEach(user => {
+        const userElement = document.createElement('li');
+
+        const avatarImg = document.createElement('img');
+        avatarImg.src = '/usr_pfps/default.png';
+        avatarImg.alt = user;
+        avatarImg.className = 'user-avatar';
+        avatarImg.onerror = function() {
+          this.src = '/usr_pfps/default.png';
+        };
+        fetch(`/usr_pfps/${user}.png`)
+                .then(response => {
+                  if (response.ok) {
+                    avatarImg.src = `/usr_pfps/${user}.png`;
+                  }
+                });
+        userElement.appendChild(avatarImg);
+
+        const userName = document.createElement('span');
+        userName.innerText = user;
+        userName.className = 'user-name';
+        userElement.appendChild(userName);
+
+        const onlineIndicator = document.createElement('span');
+        onlineIndicator.className = 'online-indicator';
+        userElement.appendChild(onlineIndicator);
+
+        activeUsersList.appendChild(userElement);
+      });
+      console.log('Updated active users list');
+    } catch (e) {
+      console.error('Error parsing active users payload:', e);
+    }
+  }
+
+  function handleUserLeave() {
+    if (stompClient && username) {
+      stompClient.send("/app/user-leave", {}, username);
+    }
+  }
+
+  window.addEventListener('beforeunload', handleUserLeave);
+
+  fetchUsername();
+</script>
+</body>
+</html>
